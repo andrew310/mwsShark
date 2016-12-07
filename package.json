@@ -1,0 +1,31 @@
+{
+  "name": "mwsshark",
+  "version": "1.0.0",
+  "description": "Wrapper to work with mws sdk, chainable commands for importing reports",
+  "main": "index.js",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "lodash": "^4.17.2",
+    "mws-sdk-promises": "^0.9.17"
+  },
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "should": "^11.1.1"
+  },
+  "scripts": {
+    "test": "mocha --timeout 10000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrew310/mwsShark.git"
+  },
+  "keywords": [
+    "mws"
+  ],
+  "author": "andrew brown",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrew310/mwsShark/issues"
+  },
+  "homepage": "https://github.com/andrew310/mwsShark#readme"
+}

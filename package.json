@@ -4,7 +4,6 @@
   "description": "Wrapper to work with mws sdk, chainable commands for importing reports",
   "main": "index.js",
   "dependencies": {
-    "bluebird": "^3.4.6",
     "lodash": "^4.17.2",
     "mws-sdk-promises": "^0.9.17"
   },

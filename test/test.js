@@ -9,7 +9,7 @@ var creds = {
 };
 
 
-describe('mws(creds)', function(){
+describe('constructor', function(){
   describe('given an obj with credentials', function(){
     it('should set up mws client', function(){
       const mws = require('..')(creds);
@@ -21,24 +21,24 @@ describe('mws(creds)', function(){
   })
 })
 
-describe('mws.reports(reportStr)', function(){
+describe('reports', function(){
   describe('given a string with report type', function(){
     it('should register report type to this', function(){
       const mws = require('..')(creds);
       const test = mws.reports('_GET_MERCHANT_LISTINGS_DATA_');
-      test.argsList.ReportTypeList.should.eql('_GET_MERCHANT_LISTINGS_DATA_');
+      test.paramsList.ReportTypeList.should.eql('_GET_MERCHANT_LISTINGS_DATA_');
     })
   })
 })
 
 
-describe('mws.list(date, cb)', function(){
+describe('list', function(){
   describe('given a date string and callback', function(){
     it('should register available from date to argsList', function(){
       const mws = require('..')(creds);
       const startDate = '2016-11-07T19:03:00.195Z';
       const test = mws.list(startDate);
-      test.argsList.AvailableFromDate.should.eql(startDate);
+      test.paramsList.AvailableFromDate.should.eql(startDate);
     })
   })
 })

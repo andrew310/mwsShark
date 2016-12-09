@@ -1,6 +1,5 @@
 'use strict';
 const MWS = require('mws-sdk-promises');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 function Mws (cred) {
@@ -13,12 +12,10 @@ function Mws (cred) {
     });
 
   this.parent = this;
-  this.argsGet = {};
-  this.argsList = {};
+  this.paramsGet = {};
+  this.paramsList = {};
   this.reqList = null;
   this.reqGet = null;
-  this.reportIds = [];
-  this.reportId = null;
 }
 
 Mws.prototype = {
@@ -27,7 +24,8 @@ Mws.prototype = {
   latest,
   get,
   zip,
-  exec
+  exec,
+  execGet
 }
 
 function exec () {
@@ -37,19 +35,29 @@ function exec () {
 module.exports = (credentials) => new Mws(credentials);
 
 function reports (ReportType) {
-  this.argsGet.ReportType = ReportType;
-  this.argsList.ReportTypeList = ReportType;
+  this.paramsGet.ReportType = ReportType;
+  this.paramsList.ReportTypeList = ReportType;
   return this;
 }
 
 function list (AvailableFromDate, callback) {
-  this.argsList.AvailableFromDate = AvailableFromDate;
+  this.paramsList.AvailableFromDate = AvailableFromDate;
   this.reqList = MWS.Reports.requests.GetReportList();
 
   return (callback) ? this.exec(callback) : this;
 }
 
-function get (callback) {
+function get () {
+  let callback
+  Array.prototype.slice.call(arguments).map((arg) => {
+    if (typeof arg === 'number' || typeof arg === 'string') {
+      this.paramsGet.ReportId = arg;
+    }
+    else if (typeof arg === 'function') {
+      callback = arg;
+    }
+  })
+
   this.reqGet = MWS.Reports.requests.GetReport();
   return (callback) ? this.exec(callback) : this;
 }
@@ -65,26 +73,41 @@ function zip (callback) {
 }
 
 function exec (callback) {
-  this.reqList.set(this.argsList);
-  const list = this.client.invoke(this.reqList);
-  list
+  if (!this.reqList) {
+    return this.paramsGet.ReportId ? this.execGet(callback) : (() => {throw 'no list or get command found'})()
+  }
+
+  this.reqList.set(this.paramsList);
+  this.client.invoke(this.reqList)
     .then((resp) => {
-      const items = resp.GetReportListResponse.GetReportListResult[0].ReportInfo;
-      // this should get all ?
-      const reportObj = this.getLatest ? getLatest(items, 'AvailableDate') : items;
+      const list = resp.GetReportListResponse.GetReportListResult[0].ReportInfo;
+      if (list === undefined) return callback(null, 'no reports available')
 
-      if (!this.reqGet) {
-        return callback(reportObj);
-      }
+      const reportObj = this.getLatest ? getLatest(list, 'AvailableDate') : list;
+      if (!this.reqGet) return callback(null, reportObj)
 
-      const reportId = reportObj.ReportId[0];
-      this.argsGet.ReportId = reportId;
-      this.reqGet.set({ReportId: this.argsGet.ReportId});
-      const prom = this.client.invoke(this.reqGet);
-      prom
-        .then(items => {
-          return this.zipReport ? callback(_zipReport(items), reportId) : callback(items, reportId);
-        });
+      // set up request for specific report
+      this.paramsGet.ReportId = reportObj.ReportId[0];
+      this.execGet(callback);
+    })
+    .catch((err) => callback(err, null))
+}
+
+function execGet (callback) {
+  this.reqGet.set(this.paramsGet);
+  this.client.invoke(this.reqGet)
+    .then(items => {
+      if (items.ErrorResponse) return callback(items.ErrorResponse.Error[0], null)
+
+      // does this eval lazy? if not change
+      const report = _zipReport(items);
+      const reportId = this.paramsGet.reportId;
+
+      return this.zipReport ? callback(null, { report, reportId })
+        : callback(null, { report: items, reportId });
+    })
+    .catch((err) => {
+      return callback(err, null);
     })
 }
 

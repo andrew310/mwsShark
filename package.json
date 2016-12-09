@@ -1,6 +1,6 @@
 {
   "name": "mwsshark",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wrapper to work with mws sdk, chainable commands for importing reports",
   "main": "index.js",
   "dependencies": {

@@ -5,7 +5,8 @@ var creds = {
   access: '123access',
   token: '123token',
   id: '123id',
-  secret: '123secret'
+  secret: '123secret',
+  host: 'mws-eu.amazonservices.com'
 };
 
 
@@ -17,15 +18,17 @@ describe('constructor', function(){
       mws.client.secretAccessKey.should.eql('123secret');
       mws.client.merchantId.should.eql('123id');
       mws.client.authToken.should.eql('123token');
+      mws.client.host.should.eql('mws-eu.amazonservices.com');
     })
   })
 })
 
-describe('reports', function(){
-  describe('given a string with report type', function(){
-    it('should register report type to this', function(){
+describe('reports constructor', function(){
+  describe('given no parameters', function(){
+    it('should register report type', function(){
       const mws = require('..')(creds);
       const test = mws.reports('_GET_MERCHANT_LISTINGS_DATA_');
+      console.log(test)
       test.paramsList.ReportTypeList.should.eql('_GET_MERCHANT_LISTINGS_DATA_');
     })
   })
@@ -37,7 +40,7 @@ describe('list', function(){
     it('should register available from date to argsList', function(){
       const mws = require('..')(creds);
       const startDate = '2016-11-07T19:03:00.195Z';
-      const test = mws.list(startDate);
+      const test = mws.reports().list(startDate);
       test.paramsList.AvailableFromDate.should.eql(startDate);
     })
   })
